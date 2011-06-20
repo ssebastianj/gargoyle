@@ -1,0 +1,24 @@
+var i=[]
+i['login'] 		= 'Logowanie'
+i['adpass']		= 'Hasło'
+i['yquo']		= 'Twój limit'
+i['enquo']		= 'Limit całej sieci'
+i['curdtim']		= 'Bieżąca data i czas'
+i['err_pre']		= 'BŁĄD'
+i['enterpass']		= 'należy wprowadzić hasło'
+i['loggingin']		= 'Logowanie'
+i['sessexp']		= 'Sesja wygasła'
+i['invpass']		= 'Złe hasło'
+i['loggedout']		= 'Wylogowano'
+i['quota']		= 'Limit'
+i['active']		= 'Aktywny'
+i['only']		= 'dotyczy'
+i['alltimexc']		= 'z wyjątkiem'
+i['totupdn']		= 'łącznego'
+i['dnld']		= 'pobierania'
+i['upld']		= 'wysyłania'
+i['loginquo_m']		= function(perc, name, qnum, used, limit){ return perc + "% z limitu " + qnum + " " + name + " zostało wykorzystane (" + used + "/" + limit + ")" }
+i['loginquo_s']		= function(perc, name, used, limit){ return perc + "% limitu " + name + " zostało wykorzystane (" + used + "/" + limit + ")" }
+i['always']		= 'Zawsze'
+
+var il8n = i;

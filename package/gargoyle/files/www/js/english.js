@@ -1,0 +1,24 @@
+var i=[]
+i['login'] 		= 'Login'
+i['adpass']		= 'Enter Admin Password'
+i['yquo']		= 'Your Quota'
+i['enquo']		= 'Entire Network Quota'
+i['curdtim']		= 'Current Date & Time'
+i['err_pre']		= 'ERROR'
+i['enterpass']		= 'You must enter a password'
+i['loggingin']		= 'Logging In'
+i['sessexp']		= 'Session Expired'
+i['invpass']		= 'Invalid Password'
+i['loggedout']		= 'Logged Out'
+i['quota']		= 'Quota'
+i['active']		= 'Active'
+i['only']		= 'Only'
+i['alltimexc']		= 'All Times Except'
+i['totupdn']		= 'total up+down'
+i['dnld']		= 'download'
+i['upld']		= 'upload'
+i['loginquo_m']		= function(perc, name, qnum, used, limit){ return perc + "% of " + name + " for quota" + quotaNumber + " has been used (" + used + "/" + limit + ")" }
+i['loginquo_s']		= function(perc, name, used, limit){ return perc + "% limitu " + name + " zostało wykorzystane (" + used + "/" + limit + ")" }
+i['always']		= 'Always'
+
+var il8n = i;

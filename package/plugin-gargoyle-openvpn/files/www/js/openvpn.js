@@ -84,7 +84,7 @@ function saveChanges()
 			uci.remove("gargoyle", "status", "openvpn_connections")
 			uci.set("openvpn_gargoyle", "server", "enabled", "false")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
-			uci.set("openvpn", "custom_config", "enable", "0")
+			uci.set("openvpn", "custom_config", "enabled", "0")
 		}
 		if(openvpnConfig == "server")
 		{
@@ -105,7 +105,7 @@ function saveChanges()
 
 
 			uci.set("gargoyle", "status", "openvpn_connections", "500")
-			uci.set("openvpn", "custom_config", "enable", "1")
+			uci.set("openvpn", "custom_config", "enabled", "1")
 			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
 
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
@@ -201,11 +201,12 @@ function saveChanges()
 
 		// if anything in server section or client section has changed, restart openvpn
 		// otherwise we're just adding client certs to a server and restart shouldn't be needed
+		var openvpnCurrentlyRunning = (tunIp != "" && openvpnProc != "" && (remotePing != "" || openvpnConfig == "server"))
 		if(openvpnConfig == "disabled")
 		{
 			commands = "/etc/init.d/openvpn stop ; " + commands
 		}
-		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" )
+		else if(commands.match(/uci.*openvpn_gargoyle\.server\./) || openvpnConfig == "client" || (!openvpnCurrentlyRunning) )
 		{
 			commands = commands + "/etc/init.d/openvpn restart ; sleep 3 ; "
 		}

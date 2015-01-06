@@ -14,39 +14,22 @@ set_constant_variables()
 	netfilter_patch_script="$top_dir/netfilter-match-modules/integrate_netfilter_modules.sh"
 
 
-	#cores / build threads
-	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
-	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
-	
-	#################################################################################################
-	# Starging in Attitude Adjustment r36470 multi-threaded builds often fail due to race conditions 
-	# somewhere. As of Attitude Adjustment r7838 these issues seem to have been resolved.
-	#
-	# However, if there is trouble with parallel builds, or you start getting mysterious non-obvious
-	# build errors in the future try setting num_build_threads to 1 below.
-	#################################################################################################
-
-	#
-	# Aaaand... this little bugger is causing problems again...
-	#
-	#num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
-	num_build_threads=1
 }
 
 set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Attitude Adjustment"
-	branch_id="attitude_adjustment"
+	branch_name="Barrier Breaker"
+	branch_id="barrier_breaker"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_12.09"
+	branch_packages_path="branches/packages_14.07"
 
 
 	# set svn revision number to use 
 	# you can set this to an alternate revision 
 	# or empty to checkout latest 
-	rnum=42171
+	rnum=43694
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -246,7 +229,25 @@ specified_profile="$7"
 translation_type="$8"
 fallback_lang="$9"
 active_lang="${10}"
-distribution="${11}"
+num_build_threads="${11}"
+distribution="${12}"
+
+num_build_thread_str=""
+if [ "$num_build_threads" = "single" ] ; then
+	num_build_threads="1"
+	num_build_thread_str="-j1"
+elif [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "auto" ] ; then
+	num_build_threads="auto"
+	num_build_thread_str=""
+elif [ "$num_build_threads" -lt 1 ] ; then
+	num_build_threads="1"
+	num_build_thread_str="-j1"
+else
+	num_build_thread_str="-j$num_build_threads"
+fi
+
+
+
 
 
 if [ "$targets" = "ALL" ]  || [ -z "$targets" ] ; then
@@ -292,7 +293,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#node
 			git clone git://github.com/joyent/node.git
 			cd node
-			git checkout v0.7.12
+			git checkout v0.11.14
 			./configure 
 			make
 			cd "$top_dir"
@@ -301,7 +302,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			#uglifyjs
 			git clone git://github.com/mishoo/UglifyJS.git
 			cd UglifyJS/bin
-			git checkout v1.3.1
+			git checkout v1.3.5
 			cd "$top_dir"
 		fi
 		uglify_test=$( echo 'var abc = 1;' | "$node_bin" "$uglifyjs_bin"  2>/dev/null )
@@ -434,6 +435,7 @@ for target in $targets ; do
 	echo ""	
 	echo "**************************************************************************"
 	echo "        Gargoyle is now building target: $target / $profile_name"
+	echo "                 (with $num_build_threads build threads)"
 	echo "**************************************************************************"
 	echo ""
 	echo ""
@@ -518,7 +520,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
+		make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	else
 		scripts/patch-kernel.sh . "$patches_dir/" 
@@ -535,7 +537,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
 
-		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
+		make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	fi
 	
@@ -632,6 +634,7 @@ for target in $targets ; do
 		echo ""	
 		echo "**************************************************************************"
 		echo "        Gargoyle is now building target: $target / $profile_name"
+		echo "                 (with $num_build_threads build threads)"
 		echo "**************************************************************************"
 		echo ""
 		echo ""
@@ -640,9 +643,9 @@ for target in $targets ; do
 
 		if [ "$verbosity" = "0" ] ; then
 			
-			make -j $num_build_threads  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
+			make $num_build_thread_str  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		else
-			make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
+			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
 
